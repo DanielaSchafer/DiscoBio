@@ -5,7 +5,7 @@ import sys
 
 dataPath = 'C:\\Users\\Daniela\\Documents\\discoBio\\FOLDer\\testData.csv'
 
-def getDimentions(inputPath):
+def getDimentions(inputPath, dataPath):
 
     minX = float('inf')
     maxX =  float('-inf')
@@ -26,7 +26,7 @@ def getDimentions(inputPath):
         if counter !=0:
             cols = molecules.split(',')
             print(cols[0])
-            suppl = Chem.SDMolSupplier(cols[0])
+            suppl = Chem.SDMolSupplier(dataPath+"\\"+cols[0])
             for molecule in suppl:
                 m = Chem.MolFromSmiles(molecule)
                 for atom in m.GetAtoms():
@@ -52,4 +52,8 @@ def getDimentions(inputPath):
     print(x,y,z)
 
 
-getDimentions(dataPath)
+#dataPath holds .sdf files
+#inputPath is file that is used to make folds 
+dataPath =  sys.argv[1]
+inputPath = sys.argv[2]
+getDimentions(inputPath,dataPath)
