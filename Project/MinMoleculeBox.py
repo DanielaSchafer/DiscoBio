@@ -27,8 +27,7 @@ def getDimentions(inputPath, dataPath):
             cols = molecules.split(',')
             print(cols[0])
             suppl = Chem.SDMolSupplier(dataPath+"\\"+cols[0])
-            for molecule in suppl:
-                m = Chem.MolFromSmiles(molecule)
+            for m in suppl:
                 for atom in m.GetAtoms():
                     point = atom.GetAtomPosition()
                     if point.x <minX:
@@ -53,7 +52,7 @@ def getDimentions(inputPath, dataPath):
 
 
 #dataPath holds .sdf files
-#inputPath is file that is used to make folds 
+#inputPath is file that is used to make folds
 dataPath =  sys.argv[1]
 inputPath = sys.argv[2]
 getDimentions(inputPath,dataPath)
