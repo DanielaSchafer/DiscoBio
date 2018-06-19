@@ -12,8 +12,8 @@ def getPaths(path):
 
 def getFingerprintSimilarity(paths, dataPath):
     avgFingerprints = list()
-    for(i in range(0,len(paths):
-        fp = getAverFingerprint(paths[i], dataPath)
+    for i in range(0,len(paths)):
+        fp = getAvgFingerprint(paths[i], dataPath)
         list.append(fp)
     getSimilarity(avgFingerprints)
 
@@ -24,22 +24,28 @@ def getAvgFingerprint(path, dataPath):
     size = len(data.readlines())
     data.seek(0)
 
-    for(i in data):
-        cols = ran[i].split(',')
+    for i in data:
+        cols = i.split(' ')
         molecules = cols[3]
-        fps = [FingerprintMols.FingerprintMol(dataPath+"\\"+x) for x in molecule]
+        for x in molecules:
+            print(dataPath+"/"+x)
+            fps = [FingerprintMols.FingerprintMol(dataPath+"/"+x)]
         avgFingerprint= avgFingerprint+fps
     avgFingerprint= avgFingerprint/size
     return avgFingerprint
 
 #prints the similiarity between each fold
 def getSimilarity(avgFingerprints):
-    for(i in range(0,len(avgFingerprints)-1):
-        for(j in range(i+1,len(avgFingerprints))):
+    for i in range(0,len(avgFingerprints)-1):      
+        for j in range(i+1,len(avgFingerprints)):
             print("Fingerprint Similarity: ",str(i),str(j),DataStructs.FingerprintSimilarity(averageFingerprints[i],averageFingerprints[j]))
 
 def runner(foldsPath,dataPath):
     paths = getPaths(foldsPath)
+
+    for file1 in range(0,len(paths)):
+        paths[file1] = foldsPath+paths[file1]
+
     getFingerprintSimilarity(paths,dataPath)
 
 
