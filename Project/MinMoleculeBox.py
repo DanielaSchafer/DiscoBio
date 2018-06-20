@@ -62,7 +62,7 @@ def getDimentions(inputData, sdfDataFolder):
     y = maxY-minY
     z = maxZ-minZ
     
-    print(str((faultyCounter/counter)*100)+" were faulty")
+    print(str((faultyCounter/counter)*100)+" of files were faulty")
     print(x,y,z)
 
 

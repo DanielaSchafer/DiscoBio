@@ -1,5 +1,8 @@
 from rdkit import DataStructs
-from rdkit.Chem.Fingerprints import FingerprintMols
+from rdkit.Chem.Fingerprints import FingerprintMols, MolSimilarity
+from rdkit import Chem
+from rdkit.ML.Cluster import Murtagh
+from rdkit.six.moves import cPickle
 import os
 import sys
 
@@ -14,7 +17,7 @@ def getFingerprintSimilarity(paths, dataPath):
     avgFingerprints = list()
     for i in range(0,len(paths)):
         fp = getAvgFingerprint(paths[i], dataPath)
-        list.append(fp)
+        avgFingerprints.append(fp)
     getSimilarity(avgFingerprints)
 
 #gets average fingerprint for a fold
@@ -23,14 +26,22 @@ def getAvgFingerprint(path, dataPath):
     data = open(path,'r')
     size = len(data.readlines())
     data.seek(0)
+    badFileCounter = 0
 
     for i in data:
         cols = i.split(' ')
-        molecules = cols[3]
-        for x in molecules:
-            print(dataPath+"/"+x)
-            fps = [FingerprintMols.FingerprintMol(dataPath+"/"+x)]
-        avgFingerprint= avgFingerprint+fps
+        try:
+            molecules = cols[3]
+        except:
+            print(i)
+        try:
+            ms = Chem.SDMolSupplier(dataPath+molecules)
+            fps = [FingerprintMols.FingerprintMol(x) for x in ms]
+            avgFingerprint= avgFingerprint+fps
+            print(avgFingerprint)
+        except:
+            badFileCounter = badFileCounter+1
+            #print("invalid file")
     avgFingerprint= avgFingerprint/size
     return avgFingerprint
 
@@ -38,7 +49,7 @@ def getAvgFingerprint(path, dataPath):
 def getSimilarity(avgFingerprints):
     for i in range(0,len(avgFingerprints)-1):      
         for j in range(i+1,len(avgFingerprints)):
-            print("Fingerprint Similarity: ",str(i),str(j),DataStructs.FingerprintSimilarity(averageFingerprints[i],averageFingerprints[j]))
+            print("Fingerprint Similarity: ",str(i),str(j),DataStructs.FingerprintSimilarity(avgFingerprints[i],avgFingerprints[j]))
 
 def runner(foldsPath,dataPath):
     paths = getPaths(foldsPath)

@@ -19,7 +19,7 @@ from shutil import copyfile
 #test file contains one fold, train file contains the rest
 def createFiles(path, folds, makeNewFolder):
     if(makeNewFolder):
-        path = path+'\\folds'+str(len(folds))+"\\"
+        path = path+'/folds'+str(len(folds))+"/"
 
         directory = os.path.dirname(path)
         if not os.path.exists(directory):
@@ -43,7 +43,7 @@ def getFolds(path,folds):
 
     inputPath = path
     f = open(inputPath,'r')
-
+    
     ran = f.readlines()
     counter = len(ran)
     random.shuffle(ran)
