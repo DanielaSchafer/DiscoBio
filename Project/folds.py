@@ -43,7 +43,7 @@ def getFolds(path,folds):
 
     inputPath = path
     f = open(inputPath,'r')
-    
+
     ran = f.readlines()
     counter = len(ran)
     random.shuffle(ran)
@@ -78,8 +78,8 @@ def foldRunner(dataPath,savePath,folds):
 
 
 #default path and fold count
-dataPath = 'C:\\Users\\Daniela\\Documents\\discoBio\\FOLDer\\testData.csv'
-savePath = 'C:\\Users\\Daniela\\Documents\\discoBio\\FOLDer'
+dataPath = '~/Documents/discoBio/FOLDer/testData.csv'
+savePath = '~/Documents/discoBio/FOLDer'
 folds = 3
 
 if(len(sys.argv) >= 4):
