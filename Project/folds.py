@@ -28,7 +28,7 @@ def createFiles(path, folds, makeNewFolder):
     for fold in range(0,len(folds)):
          newTrain = open(path+'train'+str(fold)+'.types','w+')
          newTest = open(path+'test'+str(fold)+'.types','w+')
-         newTest.writelines("%s\n" % item  for item in folds[fold])
+         newTest.writelines(folds[fold])
          for f in range(0,len(folds)):
              if(f != fold):
                 newTrain.writelines(folds[f])

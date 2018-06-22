@@ -9,7 +9,6 @@ import re
 def readFoldFile(fold):
     foldList = open(fold,'r').readlines()[0]
     list2 = re.findall(r'(1 \d{4}\.\d{1,} none [a-zA-Z0-9]{0,}_\d{5,8}\.sdf)',foldList)
-    #print(list2)
     return list2
 
 def getFingerprintHM(csvData,dataPath):
@@ -29,7 +28,6 @@ def getFingerprintHM(csvData,dataPath):
                     counter = counter +1
                 if len(fpsList)>0:
                     fingerprints[cols[0]] = fpsList
-                    #print(cols[0])
         except:        
             counter = counter + 1
     return fingerprints
@@ -41,7 +39,6 @@ def createFoldList(fingerprints, fold):
             foldList.append(fp)
 
 def compareFolds(fingerprintHM, fold1, fold2):
-    #print(len(fingerprintHM))
     strongestLink = list()
     weakestLink = list()
     for i in range(0,2):
@@ -52,23 +49,21 @@ def compareFolds(fingerprintHM, fold1, fold2):
     strongestLinkVal = float('-inf');
 
     fold1List = readFoldFile(fold1)
-    #print(len(fold1List))
     fold2List = readFoldFile(fold2)
     ms = ""
-    
+    counter = 0
     for line in fold1List:
+        print(weakestLinkVal,strongestLinkVal, str((counter/len(fold1List))*100))
+        counter = counter+1
+
         cols = line.split(" ")
         ms = cols[3]
-        #print("\'"+ms+"\'")
         if ms in fingerprintHM:
-            #print(ms)
             for line2 in fold2List:
                 cols2 = line2.split(" ")
                 ms2 = cols2[3]
-                #print(ms2)
                 if ms2 in fingerprintHM:
                     sim = DataStructs.FingerprintSimilarity(fingerprintHM[ms][0],fingerprintHM[ms2][0])
-                    #print(sim)
                     if sim < weakestLinkVal:
                         weakestLinkVal = sim
                         weakestLink[0] = ms
@@ -77,12 +72,6 @@ def compareFolds(fingerprintHM, fold1, fold2):
                         strongestLinkVal = sim
                         strongestLink[0] = ms
                         strongestLink[1] = ms2
-                        #except:
-                         #   print(line2)
-
-            #except:
-             #   print(len(cols))
-                #print(fold1)
 
     print("For partitions: "+ fold1 + " and "+ fold2)
     print("strongest link: " + str(strongestLinkVal) + " between "+str(strongestLink[0]) +" and " +str(strongestLink[1]))
@@ -98,10 +87,9 @@ def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath):
 
 def getTrainFiles(foldPath):
     paths = getPaths(foldPath)
-    r = re.compile(".*train")
+    r = re.compile(".*test")
     trainPaths = list(filter(r.match, paths))
     return trainPaths
-    #print(trainPaths)
 
 
 
