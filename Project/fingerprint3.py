@@ -8,7 +8,7 @@ import re
 
 def getFingerprintHM(csvData,dataPath):
     data = open(csvData,'r')
-    fingerprints = {}
+    fingerprints = dict()
     counter = 0
     for line in data:
         cols = line.split(",")
@@ -21,10 +21,11 @@ def getFingerprintHM(csvData,dataPath):
             for m in ms:
                 try:
                     fp = FingerprintMols.FingerprintMol(m)
-                    fpsList.append(fpsList)
+                    fpsList.append(fp)
                 except:
                     print("molecule failed")
                 fingerprints[cols[0]] = fpsList
+                #print(fingerprints[cols[0]])
                 #print(len(fingerprints))
             #print(fpsList)
         except:
@@ -39,11 +40,15 @@ def createFoldList(fingerprints, fold):
             foldList.append(fp)
 
 def compareFolds(fingerprintHM, fold1, fold2):
-    print(len(fingerprintHM))
-    weakestLink = list()
+    #print(len(fingerprintHM))
     strongestLink = list()
-    weakestLinkVal = 0;
-    strongestLinkVal = 0;
+    weakestLink = list()
+    for i in range(0,2):
+        weakestLink.append("")
+        strongestLink.append("")
+    
+    weakestLinkVal = float('inf');
+    strongestLinkVal = float('-inf');
 
     fold1List = open(fold1,'r')
     fold2List = open(fold2,'r')
@@ -52,29 +57,22 @@ def compareFolds(fingerprintHM, fold1, fold2):
     for line in fold1List:
         cols = line.split(" ")
         print(len(fingerprintHM))
-        #try:
-        #print(cols)
-        #print(len(cols))
         ms = cols[3]
-        if cols[3].endswith(r"\n"):
-            cols[3].lstrip(r'\n')
-        ms = cols[3]
+        #print(ms)
+        #print(fingerprintHM[ms])
         if ms in fingerprintHM:      
             for line2 in fold2List:
                 cols2 = line2.split(" ")
-                   # try:
-                if cols2[3].endswith(r"\n"):
-                    cols2[3].lstrip(r'\n')
                 ms2 = cols2[3]
-                print(ms2)
+                #print(ms2)
                 if ms2 in fingerprintHM:
                     sim = DataStructs.FingerprintSimilarity(fingerprintHM[ms][0],fingerprintHM[ms2][0])
-                    print("solid file!!")
+                    #print("solid file!!")
                     if sim < weakestLinkVal:
                         weakestLinkVal = sim
                         weakestLink[0] = ms
                         weakestLink[1] = ms2
-                    elif sim > strongestLinkVal:
+                    if sim > strongestLinkVal:
                         strongestLinkVal = sim
                         strongestLink[0] = ms
                         strongestLink[1] = ms2
@@ -85,7 +83,7 @@ def compareFolds(fingerprintHM, fold1, fold2):
              #   print(len(cols))
                 #print(fold1)
 
-
+    print("For partitions: "+ fold1 + " and "+ fold2)
     print("strongest link: " + str(strongestLinkVal) + " between "+str(strongestLink[0]) +" and " +str(strongestLink[1]))
     print("weakest link: "+str(weakestLinkVal)+" between "+str(weakestLink[0])+" and "+str(weakestLink[1]))
 

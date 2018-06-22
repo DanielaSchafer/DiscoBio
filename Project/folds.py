@@ -28,7 +28,7 @@ def createFiles(path, folds, makeNewFolder):
     for fold in range(0,len(folds)):
          newTrain = open(path+'train'+str(fold)+'.types','w+')
          newTest = open(path+'test'+str(fold)+'.types','w+')
-         newTest.writelines(folds[fold])
+         newTest.writelines("%s\n" % item  for item in folds[fold])
          for f in range(0,len(folds)):
              if(f != fold):
                 newTrain.writelines(folds[f])
@@ -54,8 +54,9 @@ def getFolds(path,folds):
     for pathIndex in range(0,folds):
         arr = list()
         for i in range(int(counter*(float(pathIndex)/float(folds))),int(float(counter)*((pathIndex+1)/folds))):
+            print(i)
             cols = ran[i].split(',')
-            arr.append(str(1)+str(cols[1])+"none "+str(cols[0])+"\n")
+            arr.append(str(1)+str(cols[1])+"none "+str(cols[0])+" ")
         foldList.append(arr)
     return foldList
 
