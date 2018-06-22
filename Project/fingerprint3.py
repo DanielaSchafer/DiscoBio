@@ -6,6 +6,12 @@ from rdkit import DataStructs
 import re
 
 
+def readFoldFile(fold):
+    foldList = open(fold,'r').readlines()[0]
+    list2 = re.findall(r'(1 \d{4}\.\d{1,} none [a-zA-Z0-9]{0,}_\d{5,8}\.sdf)',foldList)
+    #print(list2)
+    return list2
+
 def getFingerprintHM(csvData,dataPath):
     data = open(csvData,'r')
     fingerprints = dict()
@@ -13,23 +19,18 @@ def getFingerprintHM(csvData,dataPath):
     for line in data:
         cols = line.split(",")
         try:
-            #print(dataPath+cols[0])
             ms = Chem.SDMolSupplier(dataPath+cols[0])
-            #print(dataPath+cols[0])
-            #print(ms)
             fpsList = list()
             for m in ms:
                 try:
                     fp = FingerprintMols.FingerprintMol(m)
                     fpsList.append(fp)
                 except:
-                    print("molecule failed")
-                fingerprints[cols[0]] = fpsList
-                #print(fingerprints[cols[0]])
-                #print(len(fingerprints))
-            #print(fpsList)
-        except:
-            #print(dataPath+cols[0])
+                    counter = counter +1
+                if len(fpsList)>0:
+                    fingerprints[cols[0]] = fpsList
+                    #print(cols[0])
+        except:        
             counter = counter + 1
     return fingerprints
 
@@ -50,24 +51,24 @@ def compareFolds(fingerprintHM, fold1, fold2):
     weakestLinkVal = float('inf');
     strongestLinkVal = float('-inf');
 
-    fold1List = open(fold1,'r')
-    fold2List = open(fold2,'r')
+    fold1List = readFoldFile(fold1)
+    #print(len(fold1List))
+    fold2List = readFoldFile(fold2)
     ms = ""
     
     for line in fold1List:
         cols = line.split(" ")
-        print(len(fingerprintHM))
         ms = cols[3]
-        #print(ms)
-        #print(fingerprintHM[ms])
-        if ms in fingerprintHM:      
+        #print("\'"+ms+"\'")
+        if ms in fingerprintHM:
+            #print(ms)
             for line2 in fold2List:
                 cols2 = line2.split(" ")
                 ms2 = cols2[3]
                 #print(ms2)
                 if ms2 in fingerprintHM:
                     sim = DataStructs.FingerprintSimilarity(fingerprintHM[ms][0],fingerprintHM[ms2][0])
-                    #print("solid file!!")
+                    #print(sim)
                     if sim < weakestLinkVal:
                         weakestLinkVal = sim
                         weakestLink[0] = ms
