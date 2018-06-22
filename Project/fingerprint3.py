@@ -4,6 +4,11 @@ import os
 import sys
 from rdkit import DataStructs
 import re
+import time
+import sys
+from progress.bar import Bar
+
+toolbar_width = 40
 
 
 def readFoldFile(fold):
@@ -15,7 +20,9 @@ def getFingerprintHM(csvData,dataPath):
     data = open(csvData,'r')
     fingerprints = dict()
     counter = 0
+    
     for line in data:
+
         cols = line.split(",")
         try:
             ms = Chem.SDMolSupplier(dataPath+cols[0])
@@ -39,6 +46,7 @@ def createFoldList(fingerprints, fold):
             foldList.append(fp)
 
 def compareFolds(fingerprintHM, fold1, fold2):
+
     strongestLink = list()
     weakestLink = list()
     for i in range(0,2):
@@ -53,6 +61,7 @@ def compareFolds(fingerprintHM, fold1, fold2):
     ms = ""
     counter = 0
     for line in fold1List:
+
         print(weakestLinkVal,strongestLinkVal, str((counter/len(fold1List))*100))
         counter = counter+1
 
