@@ -67,11 +67,12 @@ def compareFolds(fingerprintHM, fold1, fold2):
     
     weakestLinkVal = float('inf');
     strongestLinkVal = float('-inf');
-
+    simTotal = 0
     fold1List = readFoldFile(fold1)
     fold2List = readFoldFile(fold2)
     ms = ""
     counter = 0
+    valuesAccountedFor = 0
     for line in fold1List:
 
         print(weakestLinkVal,strongestLinkVal, str((counter/len(fold1List))*100))
@@ -86,7 +87,7 @@ def compareFolds(fingerprintHM, fold1, fold2):
                 ms2 = cols2[3]
                 if ms2 in fingerprintHM:
                     sim = DataStructs.FingerprintSimilarity(fingerprintHM[ms][0],fingerprintHM[ms2][0])
-                    #print(sim)
+                    simTotal = simTotal +sim
                     if sim < weakestLinkVal:
                         weakestLinkVal = sim
                         weakestLink[0] = ms
@@ -95,7 +96,8 @@ def compareFolds(fingerprintHM, fold1, fold2):
                         strongestLinkVal = sim
                         strongestLink[0] = ms
                         strongestLink[1] = ms2
-    output = "For partitions: "+ fold1 + " and "+ fold2+"\nstrongest link: " + str(strongestLinkVal) + " between "+str(strongestLink[0]) +" and " +str(strongestLink[1])+"\nweakest link: "+str(weakestLinkVal)+" between "+str(weakestLink[0])+" and "+str(weakestLink[1])
+                    valuesAccountedFor = valuesAccountedFor +1
+    output = "For partitions: "+ fold1 + " and "+ fold2+"\nAverage Similaraity: "+str(simTotal/valuesAccountedFor)+"\nstrongest link: " + str(strongestLinkVal) + " between "+str(strongestLink[0]) +" and " +str(strongestLink[1])+"\nweakest link: "+str(weakestLinkVal)+" between "+str(weakestLink[0])+" and "+str(weakestLink[1])
     print(output)
     return output
 
