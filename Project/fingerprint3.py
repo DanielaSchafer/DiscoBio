@@ -1,3 +1,4 @@
+import datetime
 from rdkit.Chem.Fingerprints import FingerprintMols, MolSimilarity
 from rdkit import Chem
 import os
@@ -6,37 +7,48 @@ from rdkit import DataStructs
 import re
 import time
 import sys
-from progress.bar import Bar
 
-toolbar_width = 40
-
+now = datetime.datetime.now()
 
 def readFoldFile(fold):
-    foldList = open(fold,'r').readlines()[0]
-    list2 = re.findall(r'(1 \d{4}\.\d{1,} none [a-zA-Z0-9]{0,}_\d{5,8}\.sdf)',foldList)
+    foldList = open(fold,'r').readlines()
+    list2 = foldList
+    tempLine = ""
+    counter = 0
+    for line in list2:
+        tempLine = line.rstrip("\n")
+        tempLine = tempLine.rstrip()
+        line = tempLine
+        list2[counter] = tempLine
+        counter=counter+1
     return list2
 
-def getFingerprintHM(csvData,dataPath):
+def getFingerprintHM(csvData,dataPath,fileCol):
     data = open(csvData,'r')
     fingerprints = dict()
     counter = 0
+    totalCounter = 0
     
     for line in data:
+        tempLine = line.rstrip("\n")
+        tempLine = tempLine.rstrip()
+        line = tempLine
 
-        cols = line.split(",")
+        cols = line.split(" ")
+        #print(cols)
         try:
-            ms = Chem.SDMolSupplier(dataPath+cols[0])
+            ms = Chem.SDMolSupplier(dataPath+cols[fileCol])
             fpsList = list()
-            for m in ms:
-                try:
-                    fp = FingerprintMols.FingerprintMol(m)
-                    fpsList.append(fp)
-                except:
-                    counter = counter +1
+            for m in ms:    
+                fp = FingerprintMols.FingerprintMol(m)
+                fpsList.append(fp)
                 if len(fpsList)>0:
-                    fingerprints[cols[0]] = fpsList
-        except:        
+                    #print("AYOOO")
+                    fingerprints[cols[fileCol]] = fpsList
+        except:
             counter = counter + 1
+        totalCounter = totalCounter+1
+    #print(len(fingerprints))
     return fingerprints
 
 def createFoldList(fingerprints, fold):
@@ -68,11 +80,13 @@ def compareFolds(fingerprintHM, fold1, fold2):
         cols = line.split(" ")
         ms = cols[3]
         if ms in fingerprintHM:
+            #print("yo")
             for line2 in fold2List:
                 cols2 = line2.split(" ")
                 ms2 = cols2[3]
                 if ms2 in fingerprintHM:
                     sim = DataStructs.FingerprintSimilarity(fingerprintHM[ms][0],fingerprintHM[ms2][0])
+                    #print(sim)
                     if sim < weakestLinkVal:
                         weakestLinkVal = sim
                         weakestLink[0] = ms
@@ -81,17 +95,23 @@ def compareFolds(fingerprintHM, fold1, fold2):
                         strongestLinkVal = sim
                         strongestLink[0] = ms
                         strongestLink[1] = ms2
+    output = "For partitions: "+ fold1 + " and "+ fold2+"\nstrongest link: " + str(strongestLinkVal) + " between "+str(strongestLink[0]) +" and " +str(strongestLink[1])+"\nweakest link: "+str(weakestLinkVal)+" between "+str(weakestLink[0])+" and "+str(weakestLink[1])
+    print(output)
+    return output
 
-    print("For partitions: "+ fold1 + " and "+ fold2)
-    print("strongest link: " + str(strongestLinkVal) + " between "+str(strongestLink[0]) +" and " +str(strongestLink[1]))
-    print("weakest link: "+str(weakestLinkVal)+" between "+str(weakestLink[0])+" and "+str(weakestLink[1]))
 
+def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath,ouputPath):
+    fpsHM = getFingerprintHM(csvData,dataPath,3)
 
-def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath):
-    fpsHM = getFingerprintHM(csvData,dataPath)
+    output = list()
     for fold in range(0,len(foldArr)):
         for fold2 in range(fold, len(foldArr)):
-            compareFolds(fpsHM,foldPath+foldArr[fold], foldPath+foldArr[fold2])
+            output.append(compareFolds(fpsHM,foldPath+foldArr[fold], foldPath+foldArr[fold2]))
+    
+    now = datetime.datetime.now()
+    with open(outputPath+"ouput"+now.hour+":"+now.minute+"_"+now.day+"-"+now.month+"-"+now.year) as newTest:
+        newTest.writelines("%s\n" % item for item in output)
+
 
 
 def getTrainFiles(foldPath):
@@ -102,9 +122,9 @@ def getTrainFiles(foldPath):
 
 
 
-def runner(foldPath,csvPath,dataPath):
+def runner(foldPath,csvPath,dataPath,outputPath):
     trainFiles = getTrainFiles(foldPath)
-    getSimilaritiesBetweenFolds(trainFiles,csvPath,dataPath,foldPath)
+    getSimilaritiesBetweenFolds(trainFiles,csvPath,dataPath,foldPath,outputPath)
 
 def getPaths(path):
     paths = list()
@@ -116,5 +136,6 @@ def getPaths(path):
 foldPath = sys.argv[1]
 csvPath = sys.argv[2]
 dataPath = sys.argv[3]
-runner(foldPath,csvPath,dataPath)
+outputPath = sys.argv[4]
+runner(foldPath,csvPath,dataPath,outputPath)
 
