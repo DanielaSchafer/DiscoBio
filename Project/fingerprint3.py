@@ -102,14 +102,13 @@ def compareFolds(fingerprintHM, fold1, fold2):
 
 def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath,ouputPath):
     fpsHM = getFingerprintHM(csvData,dataPath,3)
-
     output = list()
-    for fold in range(0,len(foldArr)):
-        for fold2 in range(fold, len(foldArr)):
+    for fold in range(0,len(foldArr)-1):
+        for fold2 in range(fold+1, len(foldArr)):
             output.append(compareFolds(fpsHM,foldPath+foldArr[fold], foldPath+foldArr[fold2]))
     
     now = datetime.datetime.now()
-    with open(outputPath+"ouput"+now.hour+":"+now.minute+"_"+now.day+"-"+now.month+"-"+now.year) as newTest:
+    with open((outputPath+"ouput"+str(now.hour)+":"+str(now.minute)+"_"+str(now.day)+"-"+str(now.month)+"-"+str(now.year)),'w+') as newTest:
         newTest.writelines("%s\n" % item for item in output)
 
 
