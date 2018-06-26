@@ -1,12 +1,10 @@
+import pybel
+import openbabel
 import datetime
-from rdkit.Chem.Fingerprints import FingerprintMols, MolSimilarity
-from rdkit import Chem
 import os
 import sys
-from rdkit import DataStructs
 import re
 import time
-import sys
 
 now = datetime.datetime.now()
 
@@ -35,20 +33,17 @@ def getFingerprintHM(csvData,dataPath,fileCol):
         line = tempLine
 
         cols = line.split(" ")
-        #print(cols)
-        try:
-            ms = Chem.SDMolSupplier(dataPath+cols[fileCol])
-            fpsList = list()
-            for m in ms:    
-                fp = FingerprintMols.FingerprintMol(m)
-                fpsList.append(fp)
-                if len(fpsList)>0:
-                    #print("AYOOO")
-                    fingerprints[cols[fileCol]] = fpsList
-        except:
-            counter = counter + 1
+        ms = pybel.readfile("mol",dataPath+cols[fileCol])
+        output = list()
+        fpsList = list()
+        for m in ms:    
+            fp = m.calcfp()
+            fpsList.append(fp)
+            if len(fpsList)>0:
+                fingerprints[cols[fileCol]] = fpsList
+    
+        counter = counter + 1
         totalCounter = totalCounter+1
-    #print(len(fingerprints))
     return fingerprints
 
 def createFoldList(fingerprints, fold):
@@ -74,19 +69,17 @@ def compareFolds(fingerprintHM, fold1, fold2):
     counter = 0
     valuesAccountedFor = 0
     for line in fold1List:
-
         print(weakestLinkVal,strongestLinkVal, str((counter/len(fold1List))*100))
         counter = counter+1
 
         cols = line.split(" ")
         ms = cols[3]
         if ms in fingerprintHM:
-            #print("yo")
             for line2 in fold2List:
                 cols2 = line2.split(" ")
                 ms2 = cols2[3]
                 if ms2 in fingerprintHM:
-                    sim = DataStructs.FingerprintSimilarity(fingerprintHM[ms][0],fingerprintHM[ms2][0])
+                    sim = fingerprintHM[ms][0] | fingerprintHM[ms2][0]
                     simTotal = simTotal +sim
                     if sim < weakestLinkVal:
                         weakestLinkVal = sim
@@ -110,7 +103,7 @@ def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath,ouputPath):
             output.append(compareFolds(fpsHM,foldPath+foldArr[fold], foldPath+foldArr[fold2]))
     
     now = datetime.datetime.now()
-    with open((outputPath+"ouput"+str(now.hour)+":"+str(now.minute)+"_"+str(now.day)+"-"+str(now.month)+"-"+str(now.year)),'w+') as newTest:
+    with open((outputPath+"output"+str(now.hour)+":"+str(now.minute)+"_"+str(now.day)+"-"+str(now.month)+"-"+str(now.year)+".txt"),'w+') as newTest:
         newTest.writelines("%s\n" % item for item in output)
 
 
