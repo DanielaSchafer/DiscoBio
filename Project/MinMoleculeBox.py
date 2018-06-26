@@ -1,8 +1,10 @@
 
-from rdkit import Chem
+import openbabel
+import pybel
+from pybel import*
 import sys
 from os import listdir
-from rdkit.Chem import AllChem
+
 
 dataPath = 'C:\\Users\\Daniela\\Documents\\discoBio\\FOLDer\\testData.csv'
 
@@ -20,41 +22,33 @@ def getDimentions(inputData, sdfDataFolder):
     f = open(inputData,'r')
     length = len(f.readlines())
     f.seek(0)
-    #print(length)
 
     counter = 0
     faultyCounter = 0
 
     for molecules in f:
         if counter !=0:
-            cols = molecules.split(',')
-            #print(cols[0])
-            try:
-                suppl = Chem.SDMolSupplier(sdfDataFolder+cols[0])
-                for m in suppl:
-                    try:
-                        atoms = m.GetAtoms()
-                        for atom in range(0,len(atoms)):
-                            point = m.GetConformer().GetAtomPosition(atom)
-                            #print(point)
-                            if point.x <minX:
-                                minX = point.x
-                            elif point.x >maxX:
-                                maxX = point.x
-                            if point.y <minY:
-                                minY = point.y
-                            elif point.y >maxY:
-                                maxY = point.y
-                            if point.z <minZ:
-                                minZ = point.z
-                            elif point.z >maxZ:
-                                maxZ = point.z
-                    except:
-                        faultyCounter= faultyCounter+1
-                        #print("Faulty Molecule "+sdfDataFolder+"/"+cols[0]+" was skipped")
-            except:
-                faultyCounter = faultyCounter+1
-                #print("Faulty Molecule "+sdfDataFolder+"/"+cols[0]+"was skipped")
+            tempLine = molecules.rstrip("\n")
+            tempLine = tempLine.rstrip()
+            line  = tempLine
+            cols = line.split(" ")
+    
+            suppl = pybel.readfile("mol",sdfDataFolder+cols[3])
+            for m in suppl:
+                for atom in m:
+                    point = atom.coords
+                    if point[0]<minX:
+                        minX = point[0]
+                    elif point[0]  >maxX:
+                        maxX = point[0]
+                    if point[1] <minY:
+                        minY = point[1]
+                    elif point[1] >maxY:
+                        maxY = point[1]
+                    if point[2] <minZ:
+                        minZ = point[2]
+                    elif point[2] >maxZ:
+                        maxZ = point[2]
         counter=counter+1
 
 
@@ -62,12 +56,11 @@ def getDimentions(inputData, sdfDataFolder):
     y = maxY-minY
     z = maxZ-minZ
     
-    print(str((faultyCounter/counter)*100)+" of files were faulty")
     print(x,y,z)
 
 
 #dataPath holds .sdf files
 #inputPath is file that is used to make folds
-dataPath =  sys.argv[1]
-inputPath = sys.argv[2]
+inputPath =  sys.argv[1]
+dataPath = sys.argv[2]
 getDimentions(inputPath,dataPath)
