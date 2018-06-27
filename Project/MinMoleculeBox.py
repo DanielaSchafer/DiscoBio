@@ -9,7 +9,7 @@ from os import listdir
 dataPath = 'C:\\Users\\Daniela\\Documents\\discoBio\\FOLDer\\testData.csv'
 
 #gets dimensions of smallest possible box that will fit all molecules
-def getDimentions(inputData, sdfDataFolder):
+def getDimentions(inputData, sdfDataFolder,outputPath):
 
     minX = float('inf')
     maxX =  float('-inf')
@@ -31,9 +31,11 @@ def getDimentions(inputData, sdfDataFolder):
             tempLine = molecules.rstrip("\n")
             tempLine = tempLine.rstrip()
             line  = tempLine
-            cols = line.split(" ")
+            cols = line.split(", ")
+            cols[0].rstrip()
+            cols[1].rstrip()
     
-            suppl = pybel.readfile("mol",sdfDataFolder+cols[3])
+            suppl = pybel.readfile("mol",sdfDataFolder+cols[0]+"/"+cols[1]+".mol")
             for m in suppl:
                 for atom in m:
                     point = atom.coords
@@ -56,6 +58,9 @@ def getDimentions(inputData, sdfDataFolder):
     y = maxY-minY
     z = maxZ-minZ
     
+    with open(outputPath+"dimensions.txt",'w+') as dim:
+        dim.writelines("for dataset: "+inputPath+"\n")
+        dim.writelines('  x: '+str(x)+' y: '+str(y)+' z: '+str(z))
     print(x,y,z)
 
 
@@ -63,4 +68,5 @@ def getDimentions(inputData, sdfDataFolder):
 #inputPath is file that is used to make folds
 inputPath =  sys.argv[1]
 dataPath = sys.argv[2]
-getDimentions(inputPath,dataPath)
+outputPath = sys.argv[3]
+getDimentions(inputPath,dataPath,outputPath)
