@@ -19,10 +19,6 @@ def makeClusters(threshold,data, isAdded,fingerprintHM):
     counter = 0
 
     for m in data:
-        
-        if counter > 1000:
-            break
-
         tempLine = m.rstrip("\n")
         tempLine = tempLine.rstrip()
         line  = tempLine
@@ -50,8 +46,6 @@ def getFingerprintHM(csvData,data,fileType):
       counter = 0
 
       for line in data:
-          if counter > 1000:
-              break
           tempLine = line.rstrip("\n")
           tempLine = tempLine.rstrip()
           line = tempLine
