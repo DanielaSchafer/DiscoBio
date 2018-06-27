@@ -46,6 +46,7 @@ def getFingerprintHM(csvData,data,fileType):
       counter = 0
 
       for line in data:
+
           tempLine = line.rstrip("\n")
           tempLine = tempLine.rstrip()
           line = tempLine
@@ -83,30 +84,33 @@ def runner(csvData,dataPath,threshold,fileType,path):
     fps = getFingerprintHM(csvData,data,fileType)
     isAdded = dict()
     groups = makeClusters(threshold,data,isAdded,fps)
-    for i, g in enumerate(groups):
-        print("mol in fold "+str(i)+": "+str(len(g)))
-        for j,m in enumerate(g):
-            cols = m.split(" ")
-            groups[i][j] = str(1)+str(cols[1])+" none "+str(cols[0])+".mol "
     
     path = path+'/folds'+str(len(groups))+"/"
 
-    directory = os.path.dirname(path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
 
+    with open(path+"info.txt",'w+') as info:
 
-    for fold in range(0,len(groups)):
-        newTrain = open(path+'train'+str(fold)+'.types','w+')
-        newTest = open(path+'test'+str(fold)+'.types','w+')
-        newTest.writelines("%s\n" % item for item in groups[fold])
-        for f in range(0,len(groups)):
-            if(f != fold):
-                newTrain.writelines("%s\n" % item for item in groups[f])
-        newTrain.close()
-        newTest.close()
+        for i, g in enumerate(groups):
+            info.writelines("mol in fold "+str(i)+": "+str(len(g))+"\n")
+            for j,m in enumerate(g):
+                cols = m.split(" ")
+                groups[i][j] = str(1)+" "+str(cols[1])+" none "+str(cols[0])+".mol "
 
-    print("totalFolds "+str(len(groups)))
+        directory = os.path.dirname(path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        for fold in range(0,len(groups)):
+            newTrain = open(path+'train'+str(fold)+'.types','w+')
+            newTest = open(path+'test'+str(fold)+'.types','w+')
+            newTest.writelines("%s\n" % item for item in groups[fold])
+            for f in range(0,len(groups)):
+                if(f != fold):
+                    newTrain.writelines("%s\n" % item for item in groups[f])
+            newTrain.close()
+            newTest.close()
+
+        info.writelines("\ntotalFolds "+str(len(groups)))
 
 csvData = sys.argv[1]
 dataPath = sys.argv[2]
