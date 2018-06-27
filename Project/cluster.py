@@ -79,17 +79,46 @@ def findAllInGroup(m,groupID,threshold,groupMems,isAdded,fingerprintHM):
     for n in neigh2:
         return neigh+findAllInGroup(n,groupID,threshold,groupMems,isAdded,fingerprintHM)
 
+def evenOutGroups(groups):
+    maxLen = 0
+    newGroups = groups
+
+    for i, g in enumerate(groups):
+        if len(g)>len(groups[maxLen])
+            maxLen = i
+    
+    smallestSum = 0
+    while smallestSum < len(groups[maxLen]) or len(newGroups)>2:
+        mIndex = getMin(newGroups)
+        m = newGroups[mIndex]
+        newGroups.pop(mIndex)
+        newM = getMin(newGroups)
+        newGroups[newM] = newGroups[newM]+m
+    return newGroups
+    
+
+
+def getMin(lis):
+    minLen = 0
+    for i, l in enumerate(lis):
+        if len(l) < len(lis[minLen]):
+            minLen = i
+    return minLen
+
+
 def runner(csvData,dataPath,threshold,fileType,path):
     data = open(csvData,'r')
     fps = getFingerprintHM(csvData,data,fileType)
     isAdded = dict()
     groups = makeClusters(threshold,data,isAdded,fps)
-    
+    groups = evenOutGroups(groups)
+
+
     path = path+'/folds'+str(len(groups))+"/"
 
 
     with open(path+"info.txt",'w+') as info:
-
+        info.writelines("threshold: "+str(threshold))
         for i, g in enumerate(groups):
             info.writelines("mol in fold "+str(i)+": "+str(len(g))+"\n")
             for j,m in enumerate(g):
