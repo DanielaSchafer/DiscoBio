@@ -1,6 +1,7 @@
 import pybel
 import openbabel
 import sys
+import os
 
 def findNeighbors(threshold,m,isAdded,fingerprintHM):
     neigh = list()
@@ -29,14 +30,13 @@ def makeClusters(threshold,data, isAdded,fingerprintHM):
         cols = line.split(", ")
         cols[0].rstrip()
         cols[1].rstrip()
-        mol = cols[0]+"/"+cols[1]
+        cols[2].rstrip()
+        mol = cols[0]+"/"+cols[1]+" "+cols[2]
         if mol not in isAdded:
             group = list()
             group.append(mol)
             groupID = len(groups)
             newGroup = findAllInGroup(mol,groupID,threshold,group,isAdded,fingerprintHM)
-            print(newGroup)
-            print("hello")
             groups.append(newGroup)
             for g in newGroup:
                 isAdded[g] = groupID
@@ -59,12 +59,13 @@ def getFingerprintHM(csvData,data,fileType):
           cols = line.split(", ")
           cols[0].rstrip()
           cols[1].rstrip()
+          cols[2].rstrip()
           m = pybel.readfile(fileType,dataPath+cols[0]+"/"+cols[1]+"."+fileType)
           for mol in m:
             fps = list()
             fp = mol.calcfp()
             fps.append(fp)
-            fingerprints[cols[0]+"/"+cols[1]] = fps
+            fingerprints[cols[0]+"/"+cols[1]+" "+cols[2]] = fps
     
           mCounter = mCounter+1
           counter = counter +1
@@ -76,29 +77,48 @@ def findAllInGroup(m,groupID,threshold,groupMems,isAdded,fingerprintHM):
     neigh = findNeighbors(threshold,m,isAdded,fingerprintHM)
     neigh2 = neigh
     if len(neigh) == 0:
-        print(groupMems)
         return neigh
 
     for n in neigh:
-        print("hello")
-        #groupMems.append(n)
         isAdded[n] = groupID
     for n in neigh2:
-        print("heh")
         return neigh+findAllInGroup(n,groupID,threshold,groupMems,isAdded,fingerprintHM)
 
-def runner(csvData,dataPath,threshold,fileType):
+def runner(csvData,dataPath,threshold,fileType,path):
     data = open(csvData,'r')
     fps = getFingerprintHM(csvData,data,fileType)
     isAdded = dict()
     groups = makeClusters(threshold,data,isAdded,fps)
-    print(groups)
-    print(len(groups))
+    for i, g in enumerate(groups):
+        print("mol in fold "+str(i)+": "+str(len(g)))
+        for j,m in enumerate(g):
+            cols = m.split(" ")
+            groups[i][j] = str(1)+str(cols[1])+" none "+str(cols[0])+".mol "
+    
+    path = path+'/folds'+str(len(groups))+"/"
+
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+    for fold in range(0,len(groups)):
+        newTrain = open(path+'train'+str(fold)+'.types','w+')
+        newTest = open(path+'test'+str(fold)+'.types','w+')
+        newTest.writelines("%s\n" % item for item in groups[fold])
+        for f in range(0,len(groups)):
+            if(f != fold):
+                newTrain.writelines("%s\n" % item for item in groups[f])
+        newTrain.close()
+        newTest.close()
+
+    print("totalFolds "+str(len(groups)))
 
 csvData = sys.argv[1]
 dataPath = sys.argv[2]
 threshold = sys.argv[3]
 fileType = sys.argv[4]
+outputPath = sys.argv[5]
 
-runner(csvData,dataPath,threshold,fileType)
+runner(csvData,dataPath,threshold,fileType,outputPath)
 
