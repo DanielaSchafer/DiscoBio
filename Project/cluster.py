@@ -5,83 +5,100 @@ import sys
 def findNeighbors(threshold,m,isAdded,fingerprintHM):
     neigh = list()
     for m2 in fingerprintHM:
-        print(m2)
-        if m2 in isAdded:
-            print("in added")
-        else:
-            sim = fingerprintHM[m] | fingerprintHM[m2] 
-            print(sim)
-            if sim < threshold:
+        if m2 not in isAdded:
+            sim = fingerprintHM[m][0] | fingerprintHM[m2][0]
+            if float(sim) > float(threshold):
                 neigh.append(m2)
-    print(neigh)
     return neigh
 
-def makeClusters(threshold,molecules, isAdded,fingerprintHM):
+def makeClusters(threshold,data, isAdded,fingerprintHM):
     groups = list()
-    for m in range(0,len(molecules)):
-        tempLine = molecules[m].rstrip("\n")
+    data.seek(0)
+
+    counter = 0
+
+    for m in data:
+        
+        if counter > 1000:
+            break
+
+        tempLine = m.rstrip("\n")
         tempLine = tempLine.rstrip()
         line  = tempLine
-        cols = line.split(" ")
-        mol = cols[3]
 
-        if mol in isAdded:
-            print("in added")
-        else:
+        cols = line.split(", ")
+        cols[0].rstrip()
+        cols[1].rstrip()
+        mol = cols[0]+"/"+cols[1]
+        if mol not in isAdded:
             group = list()
-            group.append(m)
+            group.append(mol)
             groupID = len(groups)
-            group = findAllInGroup(m,groupID,threshold,group,isAdded,fingerprintHM)
-            groups.append(group)
-            for g in group:
+            newGroup = findAllInGroup(mol,groupID,threshold,group,isAdded,fingerprintHM)
+            print(newGroup)
+            print("hello")
+            groups.append(newGroup)
+            for g in newGroup:
                 isAdded[g] = groupID
+        counter = counter +1
     return groups
 
-def getFingerprintHM(csvData,dataPath):
-      data = open(csvData,'r')
+def getFingerprintHM(csvData,data,fileType):
       fingerprints = dict()
       mCounter = 0
+      
+      counter = 0
 
       for line in data:
+          if counter > 1000:
+              break
           tempLine = line.rstrip("\n")
           tempLine = tempLine.rstrip()
           line = tempLine
 
-          cols = line.split(" ")
-          #print(cols)
-          #print(dataPath+cols[3])
-          ms = pybel.readfile("mol",dataPath+cols[3])
-          fpsList = list()
-          
-          for m in ms:
-             fp = m.calcfp()
-             fpsList.append(fp)
-             fingerprints[cols[3]] = fpsList
+          cols = line.split(", ")
+          cols[0].rstrip()
+          cols[1].rstrip()
+          m = pybel.readfile(fileType,dataPath+cols[0]+"/"+cols[1]+"."+fileType)
+          for mol in m:
+            fps = list()
+            fp = mol.calcfp()
+            fps.append(fp)
+            fingerprints[cols[0]+"/"+cols[1]] = fps
     
           mCounter = mCounter+1
+          counter = counter +1
+
       return fingerprints
 
 
 def findAllInGroup(m,groupID,threshold,groupMems,isAdded,fingerprintHM):
     neigh = findNeighbors(threshold,m,isAdded,fingerprintHM)
+    neigh2 = neigh
     if len(neigh) == 0:
-        return groupMems
-    for n in neigh:
-        groupMems.append(n)
-        isAdded[n] = groupID
-    for n in neigh:
-        findAllInGroup(n,groupID,threshold,groupMems,isAdded,fingerprintHM)
+        print(groupMems)
+        return neigh
 
-def runner(csvData,dataPath,threshold):
-    fps = getFingerprintHM(csvData,dataPath)
+    for n in neigh:
+        print("hello")
+        #groupMems.append(n)
+        isAdded[n] = groupID
+    for n in neigh2:
+        print("heh")
+        return neigh+findAllInGroup(n,groupID,threshold,groupMems,isAdded,fingerprintHM)
+
+def runner(csvData,dataPath,threshold,fileType):
+    data = open(csvData,'r')
+    fps = getFingerprintHM(csvData,data,fileType)
     isAdded = dict()
-    ms = open(csvData,'r').readlines()
-    groups = makeClusters(threshold,ms,isAdded,fps)
-    
+    groups = makeClusters(threshold,data,isAdded,fps)
+    print(groups)
+    print(len(groups))
 
 csvData = sys.argv[1]
 dataPath = sys.argv[2]
 threshold = sys.argv[3]
+fileType = sys.argv[4]
 
-runner(csvData,dataPath,threshold)
+runner(csvData,dataPath,threshold,fileType)
 
