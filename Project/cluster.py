@@ -83,12 +83,12 @@ def evenOutGroups(groups):
     maxLen = 0
     newGroups = groups
 
-    for i, g in enumerate(groups):
-        if len(g)>len(groups[maxLen])
-            maxLen = i
+    for g in groups:
+        if len(g)>maxLen:
+            maxLen = len(g)
     
     smallestSum = 0
-    while smallestSum < len(groups[maxLen]) or len(newGroups)>2:
+    while smallestSum < maxLen and len(newGroups)>2:
         mIndex = getMin(newGroups)
         m = newGroups[mIndex]
         newGroups.pop(mIndex)
@@ -114,20 +114,19 @@ def runner(csvData,dataPath,threshold,fileType,path):
     groups = evenOutGroups(groups)
 
 
-    path = path+'/folds'+str(len(groups))+"/"
+    path = path+'/folds'+str(len(groups))+"-t-"+threshold+"/"
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
     with open(path+"info.txt",'w+') as info:
-        info.writelines("threshold: "+str(threshold))
+        info.writelines("threshold: "+str(threshold)+" ")
         for i, g in enumerate(groups):
             info.writelines("mol in fold "+str(i)+": "+str(len(g))+"\n")
             for j,m in enumerate(g):
                 cols = m.split(" ")
                 groups[i][j] = str(1)+" "+str(cols[1])+" none "+str(cols[0])+".mol "
-
-        directory = os.path.dirname(path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
 
         for fold in range(0,len(groups)):
             newTrain = open(path+'train'+str(fold)+'.types','w+')
@@ -140,6 +139,7 @@ def runner(csvData,dataPath,threshold,fileType,path):
             newTest.close()
 
         info.writelines("\ntotalFolds "+str(len(groups)))
+        print("folds "+str(len(groups)))
 
 csvData = sys.argv[1]
 dataPath = sys.argv[2]
