@@ -28,7 +28,7 @@ def makeClusters(threshold,data, isAdded,fingerprintHM):
         cols[1].rstrip()
         cols[2].rstrip()
         mol = cols[0]+"/"+cols[1]+" "+cols[2]
-        if mol not in isAdded:
+        if mol not in isAdded and cols[2] != 'nan':
             group = list()
             group.append(mol)
             groupID = len(groups)
@@ -55,15 +55,16 @@ def getFingerprintHM(csvData,data,fileType):
           cols[0].rstrip()
           cols[1].rstrip()
           cols[2].rstrip()
-          m = pybel.readfile(fileType,dataPath+cols[0]+"/"+cols[1]+"."+fileType)
-          for mol in m:
-            fps = list()
-            fp = mol.calcfp()
-            fps.append(fp)
-            fingerprints[cols[0]+"/"+cols[1]+" "+cols[2]] = fps
-    
-          mCounter = mCounter+1
-          counter = counter +1
+          if cols[2] != 'nan':
+              m = pybel.readfile(fileType,dataPath+cols[0]+"/"+cols[1]+"."+fileType)
+              for mol in m:
+                fps = list()
+                fp = mol.calcfp()
+                fps.append(fp)
+                fingerprints[cols[0]+"/"+cols[1]+" "+cols[2]] = fps
+        
+      mCounter = mCounter+1
+      counter = counter +1
 
       return fingerprints
 
@@ -88,7 +89,7 @@ def evenOutGroups(groups):
             maxLen = len(g)
     
     smallestSum = 0
-    while smallestSum < maxLen and len(newGroups)>2:
+    while smallestSum < maxLen and len(newGroups)>3:
         mIndex = getMin(newGroups)
         m = newGroups[mIndex]
         newGroups.pop(mIndex)
