@@ -34,23 +34,24 @@ def getDimentions(inputData, sdfDataFolder,outputPath):
             cols = line.split(", ")
             cols[0].rstrip()
             cols[1].rstrip()
-    
-            suppl = pybel.readfile("mol",sdfDataFolder+cols[0]+"/"+cols[1]+".mol")
-            for m in suppl:
-                for atom in m:
-                    point = atom.coords
-                    if point[0]<minX:
-                        minX = point[0]
-                    elif point[0]  >maxX:
-                        maxX = point[0]
-                    if point[1] <minY:
-                        minY = point[1]
-                    elif point[1] >maxY:
-                        maxY = point[1]
-                    if point[2] <minZ:
-                        minZ = point[2]
-                    elif point[2] >maxZ:
-                        maxZ = point[2]
+            cols[2].rstrip()
+            if cols[2] != 'nan':
+                suppl = pybel.readfile("mol",sdfDataFolder+cols[0]+"/"+cols[1]+".mol")
+                for m in suppl:
+                    for atom in m:
+                        point = atom.coords
+                        if point[0]<minX:
+                            minX = point[0]
+                        elif point[0]  >maxX:
+                            maxX = point[0]
+                        if point[1] <minY:
+                            minY = point[1]
+                        elif point[1] >maxY:
+                            maxY = point[1]
+                        if point[2] <minZ:
+                            minZ = point[2]
+                        elif point[2] >maxZ:
+                            maxZ = point[2]
         counter=counter+1
 
 
