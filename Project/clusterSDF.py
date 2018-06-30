@@ -26,8 +26,8 @@ def makeClusters(threshold,data, isAdded,fingerprintHM):
         cols = line.split(", ")
         cols[0].rstrip()
         cols[1].rstrip()
-        cols[2].rstrip()
-        mol = cols[0]+"/"+cols[1]+" "+cols[2]
+
+        mol = cols[0]+" "+cols[1]
         if mol not in isAdded and cols[2] != 'nan':
             group = list()
             group.append(mol)
@@ -46,25 +46,24 @@ def getFingerprintHM(csvData,data,fileType):
       counter = 0
 
       for line in data:
-
           tempLine = line.rstrip("\n")
+          tempLine = line.rstrip("%s")
           tempLine = tempLine.rstrip()
           line = tempLine
 
           cols = line.split(", ")
           cols[0].rstrip()
           cols[1].rstrip()
-          cols[2].rstrip()
-          if cols[2] != 'nan':
-              m = pybel.readfile(fileType,dataPath+cols[0]+"/"+cols[1]+"."+fileType)
+        
+          if cols[1] != 'nan':
+              m = pybel.readfile(fileType,dataPath+cols[0])
               for mol in m:
                 fps = list()
                 fp = mol.calcfp()
                 fps.append(fp)
-                fingerprints[cols[0]+"/"+cols[1]+" "+cols[2]] = fps
-        
-      mCounter = mCounter+1
-      counter = counter +1
+                fingerprints[cols[0]+" "+cols[1]] = fps
+          mCounter = mCounter+1
+          counter = counter +1
 
       return fingerprints
 
@@ -80,7 +79,7 @@ def findAllInGroup(m,groupID,threshold,groupMems,isAdded,fingerprintHM):
     for n in neigh2:
         return neigh+findAllInGroup(n,groupID,threshold,groupMems,isAdded,fingerprintHM)
 
-def evenOutGroups(groups):
+def evenOutGroups(groups,folds):
     maxLen = 0
     newGroups = groups
 
@@ -89,7 +88,7 @@ def evenOutGroups(groups):
             maxLen = len(g)
     
     smallestSum = 0
-    while smallestSum < maxLen and len(newGroups)>3:
+    while smallestSum < maxLen and len(newGroups)>int(folds):
         mIndex = getMin(newGroups)
         m = newGroups[mIndex]
         newGroups.pop(mIndex)
@@ -107,12 +106,12 @@ def getMin(lis):
     return minLen
 
 
-def runner(csvData,dataPath,threshold,fileType,path):
+def runner(csvData,dataPath,threshold,fileType,path,folds):
     data = open(csvData,'r')
     fps = getFingerprintHM(csvData,data,fileType)
     isAdded = dict()
     groups = makeClusters(threshold,data,isAdded,fps)
-    groups = evenOutGroups(groups)
+    groups = evenOutGroups(groups,folds)
 
 
     path = path+'/folds'+str(len(groups))+"-t-"+threshold+"/"
@@ -127,7 +126,7 @@ def runner(csvData,dataPath,threshold,fileType,path):
             info.writelines("mol in fold "+str(i)+": "+str(len(g))+"\n")
             for j,m in enumerate(g):
                 cols = m.split(" ")
-                groups[i][j] = str(1)+" "+str(cols[1])+" none "+str(cols[0])+".mol "
+                groups[i][j] = str(1)+" "+str(cols[1])+" none "+str(cols[0])
 
         for fold in range(0,len(groups)):
             newTrain = open(path+'train'+str(fold)+'.types','w+')
@@ -147,6 +146,7 @@ dataPath = sys.argv[2]
 threshold = sys.argv[3]
 fileType = sys.argv[4]
 outputPath = sys.argv[5]
+maxFolds = sys.argv[6]
 
-runner(csvData,dataPath,threshold,fileType,outputPath)
+runner(csvData,dataPath,threshold,fileType,outputPath,maxFolds)
 

@@ -1,5 +1,3 @@
-#Generates random folds for training and testing
-#ouputs .types files
 #args: datapath, savepath, folds OR folds (uses default datapath and savepath)
 
 
@@ -19,7 +17,7 @@ from shutil import copyfile
 #test file contains one fold, train file contains the rest
 def createFiles(path, folds, makeNewFolder):
     if(makeNewFolder):
-        path = path+'/folds'+str(len(folds))+"/"
+        path = path+'/ranFolds'+str(len(folds))+"/"
 
         directory = os.path.dirname(path)
         if not os.path.exists(directory):
@@ -28,10 +26,10 @@ def createFiles(path, folds, makeNewFolder):
     for fold in range(0,len(folds)):
          newTrain = open(path+'train'+str(fold)+'.types','w+')
          newTest = open(path+'test'+str(fold)+'.types','w+')
-         newTest.writelines(folds[fold])
+         newTest.writelines("%s\n" % item for item in folds[fold])
          for f in range(0,len(folds)):
              if(f != fold):
-                newTrain.writelines(folds[f])
+                newTrain.writelines("%s\n" % item for item in folds[f])
          newTrain.close()
          newTest.close()
 
@@ -45,18 +43,29 @@ def getFolds(path,folds):
     f = open(inputPath,'r')
 
     ran = f.readlines()
-    counter = len(ran)
     random.shuffle(ran)
     f.close()
+    
+    print(len(ran))
+    goodVals = list()
+
+    for f in ran:
+        cols = f.split(", ")
+        if cols[2] != 'nan':
+            goodVals.append(f)
+            #ran.remove(f)
+            print(cols[2])
+
+    print(len(ran))
+    counter = len(goodVals)
 
     foldList = list()
 
     for pathIndex in range(0,folds):
         arr = list()
         for i in range(int(counter*(float(pathIndex)/float(folds))),int(float(counter)*((pathIndex+1)/folds))):
-            print(i)
-            cols = ran[i].split(',')
-            arr.append(str(1)+str(cols[1])+"none "+str(cols[0])+" ")
+            cols = goodVals[i].split(', ')
+            arr.append(str(1)+" "+str(cols[2])+" none "+str(cols[0])+"/"+str(cols[1])+".mol ")
         foldList.append(arr)
     return foldList
 
