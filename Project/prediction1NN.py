@@ -6,18 +6,19 @@ def findMostSimilar(key,data,found):
     mostSimilarKey = key
     for k in data:
         sim = 0
-        if set([key,k]) in found:
-            sim = found[set([key,k])] | data[key]
-        else:
-            sim = k | key
-            found[set([key,k]) = sim
-        if sim > mostSimilarVal:
-            mostSimilarVal = sim
-            mostSimilarKey = k
+        if k != key:
+            if set([key,k]) in found:
+                sim = found[set([key,k])] | data[key]
+            else:
+                sim = k | key
+                found[set([key,k]) = sim
+            if sim > mostSimilarVal:
+                mostSimilarVal = sim
+                mostSimilarKey = k
     return mostSimilarKey
             
 
-def getDict(csv):
+def getDict(csv,dataPath):
     f = open(csv,'r')
     fingerprints = dict()
     for line in f:
@@ -33,8 +34,33 @@ def getDict(csv):
                 fp = mol.calcfp()
                 fps.append(fp)
                 fingerprints[cols[0]+"/"+cols[1]] = fps[0]     
-    return data
+    return fingerprints
+
+def get1NNPredictionDict(fingerprints):
+    #fingerprints = getDict(csv,dataPath)
+    newDict = dict()
+    found = dict()
+    for key in fingerprints:
+        newDict[key] = fingerprints[findMostSimilar(key,fingerprints,found)]
+    return newDict
+
+def getNewDictForFolds(foldPath,dataPath):
+    foldPaths = getTrainFiles(foldPath)
+    oldDict = dict()
+    newDict = dict()
+    error = dict()
+
+    for f in foldPaths:
+        oldDict[f] = getDict(f,dataPath)
+        newDict[f] = get1NNPrecitionDict(old)
+        error[f] = getRMSE(oldDict[f],newDict[f])
+        
 
 
-def get1NNPrediction(csv):
+        
+def getTrainFiles(foldPath):
+    paths = getPaths(foldPath)
+    r = re.compile(".*test")
+    trainPaths = list(filter(r.match, paths))
+    return trainPaths
 
