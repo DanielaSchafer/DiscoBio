@@ -114,7 +114,7 @@ def runner(csvData,dataPath,threshold,fileType,path,folds):
     groups = evenOutGroups(groups,folds)
 
 
-    path = path+'/folds'+str(len(groups))+"-t-"+threshold+"/"
+    path = path+'/folds'+str(len(groups))+fileType+"-t"+threshold+"/"
     directory = os.path.dirname(path)
     if not os.path.exists(directory):
         os.makedirs(directory)

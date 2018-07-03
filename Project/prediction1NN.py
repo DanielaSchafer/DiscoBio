@@ -22,18 +22,18 @@ def getDict(csv,dataPath):
     f = open(csv,'r')
     fingerprints = dict()
     for line in f:
+        line = line.rstrip("\n")
+        line = line.rstrip()
         cols = line.split(", ")
         
-        cols[0].rstrip()
-        cols[1].rstrip()
-        cols[2].rstrip()
-        if cols[2] != 'nan':
-            ms = pybel.readfile("mol",dataPath+cols[0]+"/"+cols[1]+".mol")
-            for m in ms:
-                fps = list()
-                fp = mol.calcfp()
-                fps.append(fp)
-                fingerprints[cols[0]+"/"+cols[1]] = fps[0]     
+        cols[3] = cols[3].rstrip()
+        
+        ms = pybel.readfile("mol",cols[3])
+        for m in ms:
+            fps = list()
+            fp = mol.calcfp()
+            fps.append(fp)
+            fingerprints[cols[3]] = fps[0]     
     return fingerprints
 
 def get1NNPredictionDict(fingerprints):
@@ -44,7 +44,7 @@ def get1NNPredictionDict(fingerprints):
         newDict[key] = fingerprints[findMostSimilar(key,fingerprints,found)]
     return newDict
 
-def getNewDictForFolds(foldPath,dataPath):
+def runner(foldPath,dataPath):
     foldPaths = getTrainFiles(foldPath)
     oldDict = dict()
     newDict = dict()
@@ -54,8 +54,16 @@ def getNewDictForFolds(foldPath,dataPath):
         oldDict[f] = getDict(f,dataPath)
         newDict[f] = get1NNPrecitionDict(old)
         error[f] = getRMSE(oldDict[f],newDict[f])
+    print error
+    return error
         
-
+def getRMSE(old,new):
+    avgErr = 0
+    for key in old:
+        rmsd = (old[key]-new[key])**2
+        avgErr = avgErr+rmsd
+    avgErr = avgErr/len(old)
+    return avgErr
 
         
 def getTrainFiles(foldPath):
@@ -64,3 +72,7 @@ def getTrainFiles(foldPath):
     trainPaths = list(filter(r.match, paths))
     return trainPaths
 
+foldPath = sys.argv[1]
+dataPath = sys.argv[2]
+
+ dirunner(foldPath,dataPath)
