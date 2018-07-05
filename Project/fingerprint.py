@@ -142,7 +142,7 @@ def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath,ouputPath):
             output.append(compareFolds(fpsHM,foldPath+foldArr[fold], foldPath+foldArr[fold2]))
     
     now = datetime.datetime.now()
-    with open((foldPath+"foldSimilarity.txt"),'w+') as newTest:
+    with open((foldPath+"foldSimilarityMOL.txt"),'w+') as newTest:
         newTest.writelines("%s\n" % item for item in output)
 
 

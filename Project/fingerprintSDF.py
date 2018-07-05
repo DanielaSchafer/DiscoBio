@@ -40,18 +40,20 @@ def getFingerprintHM(csvData,dataPath,fileCol):
         cols = line.split(", ")
         cols[0] = cols[0].rstrip()
         cols[1] = cols[1].rstrip()
-
-        ms = pybel.readfile("mol",dataPath+cols[0]+"/"+cols[1]+".mol")
-        output = list()
-        fpsList = list()
-        for m in ms:    
-            fp = m.calcfp()
-            fpsList.append(fp)
-            if len(fpsList)>0:
-                fingerprints[cols[0]+"/"+cols[1]+".mol"] = fpsList
-    
-        counter = counter + 1
-        totalCounter = totalCounter+1
+        try:
+            ms = pybel.readfile("sdf",dataPath+cols[0])
+            print(ms)
+            output = list()
+            fpsList = list()
+            for m in ms:    
+                fp = m.calcfp()
+                fpsList.append(fp)
+                if len(fpsList)>0:
+                    fingerprints[cols[0]+" "+cols[1]] = fpsList
+            counter = counter + 1
+            totalCounter = totalCounter+1
+        except:
+            pass
     return fingerprints
 
 
@@ -87,11 +89,15 @@ def compareFolds(fingerprintHM, fold1, fold2):
 
 
     for line in fold1List:
-        print(str(extremeVals[0])+" "+str(extremeVals[1]),str(int((counter/len(fold1List))*100)))
+        print(line)
+        #print(str(extremeVals[0])+" "+str(extremeVals[1]),str(int((counter/len(fold1List))*100)))
         counter = counter+1
 
         cols = line.split(" ")
-        ms = cols[3].rstrip()
+        ms = cols[3].rstrip("\n")
+        ms = ms.rstrip()
+        cols[1].rstrip()
+        ms = ms+" "+cols[1]
         if ms in fingerprintHM:
             extremeVals = compareToSecondFold(fingerprintHM,ms,fold2List,extremeVals)
                     
@@ -106,7 +112,7 @@ def compareFolds(fingerprintHM, fold1, fold2):
 def compareToSecondFold(fingerprintHM, ms,fold2List,extremeVals):
     for line2 in fold2List:
                 cols2 = line2.split(" ")
-                ms2 = cols2[3].rstrip()
+                ms2 = cols2[3].rstrip()+" "+cols2[1].rstrip()
                 if ms2 in fingerprintHM:
                     sim = fingerprintHM[ms][0] | fingerprintHM[ms2][0]
                     #simTotal = simTotal +sim
@@ -142,7 +148,7 @@ def getSimilaritiesBetweenFolds(foldArr,csvData,dataPath,foldPath,ouputPath):
             output.append(compareFolds(fpsHM,foldPath+foldArr[fold], foldPath+foldArr[fold2]))
     
     now = datetime.datetime.now()
-    with open((foldPath+"foldSimilarity.txt"),'w+') as newTest:
+    with open((foldPath+"foldSimilaritySDF.txt"),'w+') as newTest:
         newTest.writelines("%s\n" % item for item in output)
 
 
