@@ -36,7 +36,7 @@ def getDimentions(inputData, sdfDataFolder,outputPath):
             cols[1].rstrip()
             cols[2].rstrip()
             if cols[2] != 'nan':
-                suppl = pybel.readfile("mol",sdfDataFolder+cols[0]+"/"+cols[1]+".mol")
+                suppl = pybel.readfile("sdf",sdfDataFolder+cols[0]+".sdf")
                 for m in suppl:
                     minAX = float('inf')
                     maxAX = float('-inf')
